@@ -1,0 +1,13 @@
+package com.fitway.fitmatch.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.fitway.fitmatch.entity.User;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email); // מאפשר למצוא משתמש לפי האימייל שלו, נחוץ לצורך ההתחברות
+}
