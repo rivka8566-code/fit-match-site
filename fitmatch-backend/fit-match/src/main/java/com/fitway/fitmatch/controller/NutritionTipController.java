@@ -3,6 +3,9 @@ package com.fitway.fitmatch.controller;
 import com.fitway.fitmatch.dto.NutritionTipDTO;
 import com.fitway.fitmatch.service.NutritionTipService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,5 +23,17 @@ public class NutritionTipController {
     public ResponseEntity<?> add(@RequestBody NutritionTipDTO tipDto) {
         nutritionTipService.add(tipDto);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // החזרת סטטוס 211 (נוצר בהצלחה)
+    }
+
+    // נקודת קצה למחיקת חוק תזונה מהמאגר (CRUD בסיסי)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        nutritionTipService.deleteById(id);
+        return ResponseEntity.noContent().build(); // מחזיר סטטוס 204 (נמחק בהצלחה, אין תוכן להחזיר)
+    }
+
+    @GetMapping
+    public ResponseEntity<List<NutritionTipDTO>> getAllTips() {
+        return ResponseEntity.ok(nutritionTipService.getAllTips());
     }
 }

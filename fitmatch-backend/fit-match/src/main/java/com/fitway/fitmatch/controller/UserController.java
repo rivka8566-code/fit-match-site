@@ -5,6 +5,9 @@ import com.fitway.fitmatch.dto.UserResponseDTO;
 import com.fitway.fitmatch.dto.LoginRequestDTO; // DTO פשוט שמכיל שדות email ו-password
 import com.fitway.fitmatch.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,4 +31,27 @@ public class UserController {
         UserResponseDTO response = userService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    // 3. שליפת פרופיל משתמש (עבור ה-Dashboard בריאקט)
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUserProfile(@PathVariable Long id) {
+        UserResponseDTO response = userService.getUserById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    // 4. עדכון קלוריות בזמן אמת כשהמשתמש מסיים אימון!
+    @PutMapping("/{id}/add-calories")
+    public ResponseEntity<UserResponseDTO> updateBurnedCalories(
+            @PathVariable Long id, 
+            @RequestParam int calories) {
+        UserResponseDTO updatedUser = userService.addCaloriesToUser(id, calories);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    // 3. קבלת כל המשתמשים (פיצ'ר מנהל)
+    @GetMapping
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
 }

@@ -6,6 +6,9 @@ import com.fitway.fitmatch.dto.WorkoutDTO;
 import com.fitway.fitmatch.service.UserProgramService;
 import com.fitway.fitmatch.service.WorkoutService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,5 +42,12 @@ public class UserProgramController {
             @PathVariable Long workoutId) {
         WorkoutDTO newWorkout = workoutService.swapWorkoutInProgram(programId, workoutId);
         return ResponseEntity.ok(newWorkout);
+    }
+
+    // 4. שליפת כל התוכניות שהיו למשתמש אי פעם (היסטוריית תוכניות)
+    @GetMapping("/user/{userId}/all")
+    public ResponseEntity<List<UserProgramDTO>> getAllUserPrograms(@PathVariable Long userId) {
+        List<UserProgramDTO> allPrograms = userProgramService.getAllProgramsByUserId(userId);
+        return ResponseEntity.ok(allPrograms);
     }
 }

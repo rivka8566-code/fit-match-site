@@ -1,6 +1,7 @@
 package com.fitway.fitmatch.controller;
 
 import com.fitway.fitmatch.exception.UserAuthException;
+import com.fitway.fitmatch.exception.NutritionTipException;
 import com.fitway.fitmatch.exception.ProgramException;
 import com.fitway.fitmatch.exception.WorkoutException; // ה-Import לשגיאה החדשה
 import org.springframework.http.HttpStatus;
@@ -31,5 +32,10 @@ public class ControllerAdvice {
     public ResponseEntity<String> handleGeneralException(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("אופסס... משהו קטן השתבש בשרת, הצוות הטכני שלנו כבר מטפל בזה!");
+    }
+
+    @ExceptionHandler(NutritionTipException.class)
+    public ResponseEntity<String> handleNutritionTipException(NutritionTipException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }

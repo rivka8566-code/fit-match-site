@@ -2,6 +2,7 @@ package com.fitway.fitmatch.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -133,5 +134,13 @@ public class UserProgramServiceImpl implements UserProgramService {
         }
         
         return responseDTO;
+    }
+
+    @Override
+    public List<UserProgramDTO> getAllProgramsByUserId(Long userId) {
+        // שליפת כל התוכניות של המשתמש מה-DB
+        return userProgramRepository.findByUserId(userId).stream()
+                .map(program -> mapper.map(program, UserProgramDTO.class)) // משתמש במתודת המרת ה-DTO הקיימת שלך בקובץ זה
+                .collect(Collectors.toList());
     }
 }

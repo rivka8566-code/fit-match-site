@@ -6,8 +6,14 @@ import com.fitway.fitmatch.dto.UserResponseDTO;
 import com.fitway.fitmatch.entity.User;
 import com.fitway.fitmatch.exception.UserAuthException;
 import com.fitway.fitmatch.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.mindrot.jbcrypt.BCrypt; // ספריה להצפנת סיסמאות
 import org.springframework.stereotype.Service;
 
@@ -49,5 +55,30 @@ public class UserServiceImpl implements UserService {
         }
 
         return mapper.map(user, UserResponseDTO.class);
+    }
+
+    @Override
+    public UserResponseDTO getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserAuthException("User not found"));
+        return mapper.map(user, UserResponseDTO.class);
+    }
+
+    @Override
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> mapper.map(user, UserResponseDTO.class))
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDTO addCaloriesToUser(Long id, int calories) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserAuthException("User not found"));
+        
+        user.setTotalCaloriesBurned(user.getTotalCaloriesBurned() + calories);
+        User updatedUser = userRepository.save(user);
+        return mapper.map(updatedUser, UserResponseDTO.class);
     }
 }
