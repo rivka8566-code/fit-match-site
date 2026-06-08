@@ -1,5 +1,6 @@
 package com.fitway.fitmatch.dto;
 
+import com.fitway.fitmatch.entity.enums.ProgramStatus;
 import lombok.Data;
 import java.time.LocalDate;
 import java.util.List;
@@ -11,5 +12,7 @@ public class UserProgramDTO {
     private int durationWeeks;
     private int daysPerWeekTarget;
     private int totalTargetCalories;
-    private List<WorkoutDTO> workouts; // כל אימון בפנים כבר מכיל את הטיפ שלו
+    private int burnedCaloriesInProgram;
+    private ProgramStatus status;
+    private List<WorkoutDTO> workouts;
 }

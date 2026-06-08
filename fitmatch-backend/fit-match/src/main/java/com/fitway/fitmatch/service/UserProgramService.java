@@ -8,5 +8,6 @@ import com.fitway.fitmatch.dto.UserProgramDTO;
 public interface UserProgramService {
     UserProgramDTO createProgramFromQuestionnaire(QuestionnaireDTO questionnaire);
     UserProgramDTO getActiveProgramByUserId(Long userId);
-    List<UserProgramDTO> getAllProgramsByUserId(Long userId); // חדש: היסטוריית תוכניות
+    List<UserProgramDTO> getAllProgramsByUserId(Long userId);
+    UserProgramDTO activateFutureProgram(Long programId);
 }

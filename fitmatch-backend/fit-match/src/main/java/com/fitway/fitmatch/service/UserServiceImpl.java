@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.mindrot.jbcrypt.BCrypt; // ספריה להצפנת סיסמאות
 import org.springframework.stereotype.Service;
@@ -37,8 +36,9 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
-        user.setPassword(hashedPassword); // שמירת ה-Hash בלבד!
+        user.setPassword(hashedPassword);
         user.setTotalCaloriesBurned(0);
+        user.setRole(request.getRole() != null ? request.getRole() : com.fitway.fitmatch.entity.enums.UserRole.USER);
 
         User savedUser = userRepository.save(user);
         return mapper.map(savedUser, UserResponseDTO.class);

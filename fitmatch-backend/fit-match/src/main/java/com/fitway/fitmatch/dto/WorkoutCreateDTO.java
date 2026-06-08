@@ -6,8 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class WorkoutDTO {
-    private Long id;
+public class WorkoutCreateDTO {
     private String title;
     private String description;
     private String youtubeUrl;
@@ -15,9 +14,6 @@ public class WorkoutDTO {
     private int caloriesBurned;
     private DifficultyLevel difficultyLevel;
     private WorkoutLocation location;
-    private List<EquipmentDTO> requiredEquipment;
-    private List<BodyPartDTO> targetBodyParts;
-    private String foodRecommendation;
-    private String waterRecommendation;
-    private boolean completed; // האם המשתמש סיים אימון זה בתוכנית הנוכחית
+    private List<Long> equipmentIds;
+    private List<Long> bodyPartIds;
 }

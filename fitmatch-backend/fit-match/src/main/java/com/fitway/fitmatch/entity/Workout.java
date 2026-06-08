@@ -42,9 +42,9 @@ public class Workout {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "workout_equipment", joinColumns = @JoinColumn(name = "workout_id"), inverseJoinColumns = @JoinColumn(name = "equipment_id"))
-    private List<Equipment> requiredEquipment;
+    private List<Equipment> requiredEquipment = new java.util.ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "workout_body_parts", joinColumns = @JoinColumn(name = "workout_id"), inverseJoinColumns = @JoinColumn(name = "body_part_id"))
-    private List<BodyPart> targetBodyParts;
+    private List<BodyPart> targetBodyParts = new java.util.ArrayList<>();
 }

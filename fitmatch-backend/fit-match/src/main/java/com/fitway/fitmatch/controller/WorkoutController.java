@@ -33,4 +33,11 @@ public class WorkoutController {
         List<WorkoutDTO> filteredWorkouts = workoutService.getFilteredWorkouts(difficulty, location);
         return ResponseEntity.ok(filteredWorkouts);
     }
+
+    // 3. הוספת אימון חדש (פיצ'ר Admin)
+    @PostMapping("/add")
+    public ResponseEntity<WorkoutDTO> addWorkout(@RequestBody com.fitway.fitmatch.dto.WorkoutCreateDTO dto) {
+        WorkoutDTO created = workoutService.addWorkout(dto);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(created);
+    }
 }

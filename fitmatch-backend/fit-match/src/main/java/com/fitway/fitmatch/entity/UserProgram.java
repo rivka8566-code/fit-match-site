@@ -27,6 +27,7 @@ public class UserProgram {
     private int durationWeeks;
     private int daysPerWeekTarget;
     private int totalTargetCalories;
+    private int burnedCaloriesInProgram = 0;
 
     @Enumerated(EnumType.STRING)
     private ProgramStatus status; // ACTIVE, COMPLETED, FUTURE

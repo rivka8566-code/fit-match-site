@@ -1,30 +1,34 @@
 package com.fitway.fitmatch.entity;
 
+import com.fitway.fitmatch.entity.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity // מציין שזו ישות שמתאימה לטבלה במסד הנתונים
-@Table(name = "users") // שם הטבלה במסד הנתונים
-@Data // גטרים וסטרים אוטומטיים
-@NoArgsConstructor // קונסטרקטור ללא פרמטרים
-@AllArgsConstructor // קונסטרקטור עם כל הפרמטרים
+@Entity
+@Table(name = "users")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
-    @Id // מציין שזהו המזהה הראשי של הישות
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // אסטרטגיית יצירת מזהה אוטומטית
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)// עמודה שלא יכולה להיות ריקה וצריכה להיות ייחודית
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)// עמודה שלא יכולה להיות ריקה
+    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)// עמודה שלא יכולה להיות ריקה
+    @Column(nullable = false)
     private String fullName;
 
-    // נתוני ה-Dashboard וההתקדמות
-    private int totalCaloriesBurned = 0; // סך כל הקלוריות שהוריד באתר
+    private int totalCaloriesBurned = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.USER;
 }

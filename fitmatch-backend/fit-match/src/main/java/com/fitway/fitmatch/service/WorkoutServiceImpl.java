@@ -1,5 +1,11 @@
 package com.fitway.fitmatch.service;
 
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fitway.fitmatch.dto.WorkoutDTO;
 import com.fitway.fitmatch.entity.BodyPart;
 import com.fitway.fitmatch.entity.UserProgram;
@@ -9,12 +15,8 @@ import com.fitway.fitmatch.entity.enums.WorkoutLocation;
 import com.fitway.fitmatch.exception.WorkoutException;
 import com.fitway.fitmatch.repository.UserProgramRepository;
 import com.fitway.fitmatch.repository.WorkoutRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor // יצירת בנאי והזרקה אוטומטית של השדות (כמו אצל המורה)
@@ -22,6 +24,8 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     private final WorkoutRepository workoutRepository;
     private final UserProgramRepository userProgramRepository;
+    private final com.fitway.fitmatch.repository.BodyPartRepository bodyPartRepository;
+    private final com.fitway.fitmatch.repository.EquipmentRepository equipmentRepository;
     private final ModelMapper mapper; // משמש להעברה חלקה בין ישויות ל-DTOs
 
     @Override
@@ -81,19 +85,44 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<WorkoutDTO> getAllWorkouts() {
-        // מתודת עזר לשליפת כל האימונים הקיימים במערכת
         return workoutRepository.findAll().stream()
                 .map(workout -> mapper.map(workout, WorkoutDTO.class))
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<WorkoutDTO> getFilteredWorkouts(DifficultyLevel difficulty, WorkoutLocation location) {
         return workoutRepository.findAll().stream()
                 .filter(w -> difficulty == null || w.getDifficultyLevel() == difficulty)
                 .filter(w -> location == null || w.getLocation() == location)
                 .map(workout -> mapper.map(workout, WorkoutDTO.class))
                 .toList();
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public WorkoutDTO addWorkout(com.fitway.fitmatch.dto.WorkoutCreateDTO dto) {
+        Workout workout = new Workout();
+        workout.setTitle(dto.getTitle());
+        workout.setDescription(dto.getDescription());
+        workout.setYoutubeUrl(dto.getYoutubeUrl());
+        workout.setDurationMinutes(dto.getDurationMinutes());
+        workout.setCaloriesBurned(dto.getCaloriesBurned());
+        workout.setDifficultyLevel(dto.getDifficultyLevel());
+        workout.setLocation(dto.getLocation());
+
+        if (dto.getBodyPartIds() != null && !dto.getBodyPartIds().isEmpty()) {
+            workout.setTargetBodyParts(bodyPartRepository.findAllById(dto.getBodyPartIds()));
+        }
+        if (dto.getEquipmentIds() != null && !dto.getEquipmentIds().isEmpty()) {
+            workout.setRequiredEquipment(equipmentRepository.findAllById(dto.getEquipmentIds()));
+        }
+
+        Workout saved = workoutRepository.save(workout);
+        workout.setId(saved.getId());
+        return mapper.map(workout, WorkoutDTO.class);
     }
 }

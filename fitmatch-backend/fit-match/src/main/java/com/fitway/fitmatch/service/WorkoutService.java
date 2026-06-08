@@ -8,8 +8,7 @@ import java.util.List;
 
 public interface WorkoutService {
     WorkoutDTO swapWorkoutInProgram(Long programId, Long currentWorkoutId);
-
     List<WorkoutDTO> getAllWorkouts();
-
     List<WorkoutDTO> getFilteredWorkouts(DifficultyLevel difficulty, WorkoutLocation location);
+    WorkoutDTO addWorkout(com.fitway.fitmatch.dto.WorkoutCreateDTO dto);
 }
