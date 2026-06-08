@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fitway.fitmatch.dto.QuestionnaireDTO;
 import com.fitway.fitmatch.dto.UserProgramDTO;
 import com.fitway.fitmatch.dto.WorkoutDTO;
-import com.fitway.fitmatch.entity.NutritionTip;
 import com.fitway.fitmatch.entity.ProgramWorkoutStatus;
 import com.fitway.fitmatch.entity.User;
 import com.fitway.fitmatch.entity.UserProgram;

@@ -4,7 +4,6 @@ import com.fitway.fitmatch.dto.UserProgramDTO;
 import com.fitway.fitmatch.service.ProgramWorkoutStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 // Removed REST mapping to avoid duplicate API path with UserProgramController.
 @RequiredArgsConstructor
