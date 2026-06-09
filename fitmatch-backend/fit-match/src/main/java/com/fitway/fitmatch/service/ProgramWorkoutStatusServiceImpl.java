@@ -27,7 +27,6 @@ public class ProgramWorkoutStatusServiceImpl implements ProgramWorkoutStatusServ
     private final ProgramWorkoutStatusRepository statusRepository;
     private final UserProgramRepository userProgramRepository;
     private final WorkoutRepository workoutRepository;
-    private final UserRepository userRepository;
     private final NutritionTipRepository nutritionTipRepository;
     private final UserService userService;
     private final ModelMapper mapper;
