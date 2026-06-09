@@ -44,9 +44,8 @@ public class UserProgramServiceImpl implements UserProgramService {
 
         List<Workout> allWorkouts = workoutRepository.findAll();
 
-        // 1. סינון בסיסי לפי רמה, מיקום וציוד
         List<Workout> validWorkouts = allWorkouts.stream()
-                .filter(w -> w.getDifficultyLevel() == questionnaire.getDifficultyLevel())
+                .filter(w -> w.getDifficultyLevel() == questionnaire.getDifficultyLevel())// סינון לפי מיקום וציוד זמין
                 .filter(w -> questionnaire.getPreferredLocations() == null ||
                              questionnaire.getPreferredLocations().isEmpty() ||
                              questionnaire.getPreferredLocations().contains(w.getLocation()))

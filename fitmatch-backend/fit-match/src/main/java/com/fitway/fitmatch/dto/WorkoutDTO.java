@@ -17,7 +17,7 @@ public class WorkoutDTO {
     private WorkoutLocation location;
     private List<EquipmentDTO> requiredEquipment;
     private List<BodyPartDTO> targetBodyParts;
-    private String foodRecommendation;
-    private String waterRecommendation;
+    private String foodRecommendation; //טיפ תזונה לפני או אחרי האימון
+    private String waterRecommendation;//טיפ שתייה לפני או אחרי האימון
     private boolean completed; // האם המשתמש סיים אימון זה בתוכנית הנוכחית
 }

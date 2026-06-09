@@ -19,7 +19,7 @@ export const getAllUsers = () => API.get('/users');
 // --- Programs ---
 export const createProgram = (questionnaireDTO) => API.post('/programs/create', questionnaireDTO);
 // { userId, difficultyLevel, preferredLocations[], daysPerWeek, durationWeeks,
-//   weeklyCaloriesGoal, preferredStartDate, preferredBodyPartIds[], availableEquipmentIds[] }
+//   preferredStartDate, preferredBodyPartIds[], availableEquipmentIds[] }
 
 export const getActiveProgram = (userId) => API.get(`/programs/active/${userId}`);
 

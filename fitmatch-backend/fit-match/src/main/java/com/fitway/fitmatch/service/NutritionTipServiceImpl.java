@@ -25,7 +25,6 @@ public class NutritionTipServiceImpl implements NutritionTipService {
             throw new NutritionTipException("שגיאה: טווח הקלוריות המינימלי אינו יכול להיות גדול מהטווח המקסימלי!");
         }
 
-        // המרה מ-DTO לישות NutritionTip ושמירה ב-DB (בדיוק כמו אצל המורה)
         nutritionTipRepository.save(mapper.map(tipDto, NutritionTip.class));
     }
 

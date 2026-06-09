@@ -47,7 +47,6 @@ export default function QuestionnairePage() {
     preferredLocations: [],
     daysPerWeek: 3,
     durationWeeks: 4,
-    weeklyCaloriesGoal: 0,
     preferredBodyPartIds: [],
     availableEquipmentIds: [],
   });
@@ -90,10 +89,9 @@ export default function QuestionnairePage() {
   const canNext = () => {
     if (step === 0) return !!form.difficultyLevel;
     if (step === 1) return form.preferredLocations.length > 0;
-      if (step === 2) {
-    // 👈 מעדכנים את זה שלא יבדוק יותר את weeklyCaloriesGoal
-    return form.daysPerWeek > 0 && form.durationWeeks > 0;
-  }
+    if (step === 2) {
+      return form.daysPerWeek > 0 && form.durationWeeks > 0;
+    }
     return true;
   };
   
@@ -107,7 +105,6 @@ export default function QuestionnairePage() {
         preferredLocations: form.preferredLocations,
         daysPerWeek: form.daysPerWeek,
         durationWeeks: form.durationWeeks,
-        weeklyCaloriesGoal: form.weeklyCaloriesGoal,
         preferredBodyPartIds: form.preferredBodyPartIds,
         availableEquipmentIds: form.availableEquipmentIds,
       });

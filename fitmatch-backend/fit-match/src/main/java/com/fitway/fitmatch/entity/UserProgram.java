@@ -21,9 +21,9 @@ public class UserProgram {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // המשתמש אליו משויכת התוכנית
+    private User user;
 
-    private LocalDate startDate; // תאריך התחלה שהמשתמש בחר
+    private LocalDate startDate;
     private int durationWeeks;
     private int daysPerWeekTarget;
     private int totalTargetCalories;
@@ -34,6 +34,6 @@ public class UserProgram {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_program_workouts", joinColumns = @JoinColumn(name = "program_id"), inverseJoinColumns = @JoinColumn(name = "workout_id"))
-    @OrderColumn(name = "workout_order") // 👈 השורה הזו היא קסם טהור!
+    @OrderColumn(name = "workout_order")
     private List<Workout> workouts = new java.util.ArrayList<>();
 }

@@ -23,7 +23,6 @@ public class UserProgramController {
     private final ProgramWorkoutStatusService programWorkoutStatusService;
     private final WorkoutService workoutService;
 
-    // 1. קבלת נתוני השאלון ובניית תוכנית חדשה
     @PostMapping("/create")
     public ResponseEntity<UserProgramDTO> createProgram(@RequestBody QuestionnaireDTO questionnaire) {
         UserProgramDTO newProgram = userProgramService.createProgramFromQuestionnaire(questionnaire);
@@ -39,14 +38,12 @@ public class UserProgramController {
         return ResponseEntity.ok(program);
     }
 
-    // 2. שליפת התוכנית הפעילה הנוכחית עבור מסך ה-Dashboard של המשתמש
     @GetMapping("/active/{userId}")
     public ResponseEntity<UserProgramDTO> getActiveProgram(@PathVariable Long userId) {
         UserProgramDTO activeProgram = userProgramService.getActiveProgramByUserId(userId);
         return ResponseEntity.ok(activeProgram);
     }
 
-    // 3. פיצ'ר ה-Shuffle: החלפת אימון ספציפי בתוכנית באימון דומה אחר
     @PostMapping("/{programId}/swap/{workoutId}")
     public ResponseEntity<WorkoutDTO> swapWorkout(
             @PathVariable Long programId,
@@ -55,14 +52,12 @@ public class UserProgramController {
         return ResponseEntity.ok(newWorkout);
     }
 
-    // 4. שליפת כל התוכניות שהיו למשתמש אי פעם (היסטוריית תוכניות)
     @GetMapping("/user/{userId}/all")
     public ResponseEntity<List<UserProgramDTO>> getAllUserPrograms(@PathVariable Long userId) {
         List<UserProgramDTO> allPrograms = userProgramService.getAllProgramsByUserId(userId);
         return ResponseEntity.ok(allPrograms);
     }
 
-    // 5. הפעלת תוכנית עתידית ידנית (כשאין תוכנית פעילה)
     @PostMapping("/{programId}/activate")
     public ResponseEntity<UserProgramDTO> activateProgram(@PathVariable Long programId) {
         UserProgramDTO activated = userProgramService.activateFutureProgram(programId);

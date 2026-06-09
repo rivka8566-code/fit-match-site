@@ -32,14 +32,12 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // 3. שליפת פרופיל משתמש (עבור ה-Dashboard בריאקט)
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserProfile(@PathVariable Long id) {
         UserResponseDTO response = userService.getUserById(id);
         return ResponseEntity.ok(response);
     }
 
-    // 4. עדכון קלוריות בזמן אמת כשהמשתמש מסיים אימון!
     @PutMapping("/{id}/add-calories")
     public ResponseEntity<UserResponseDTO> updateBurnedCalories(
             @PathVariable Long id, 
@@ -48,7 +46,6 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    // 3. קבלת כל המשתמשים (פיצ'ר מנהל)
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());

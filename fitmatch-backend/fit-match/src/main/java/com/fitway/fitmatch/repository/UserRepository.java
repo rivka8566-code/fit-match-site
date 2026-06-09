@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email); // מאפשר למצוא משתמש לפי האימייל שלו, נחוץ לצורך ההתחברות
+    Optional<User> findByEmail(String email);
 }

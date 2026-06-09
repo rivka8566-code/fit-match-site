@@ -28,14 +28,16 @@ public class ControllerAdvice {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
+    @ExceptionHandler(NutritionTipException.class)
+    public ResponseEntity<String> handleNutritionTipException(NutritionTipException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("אופסס... משהו קטן השתבש בשרת, הצוות הטכני שלנו כבר מטפל בזה!");
     }
 
-    @ExceptionHandler(NutritionTipException.class)
-    public ResponseEntity<String> handleNutritionTipException(NutritionTipException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-    }
+
 }

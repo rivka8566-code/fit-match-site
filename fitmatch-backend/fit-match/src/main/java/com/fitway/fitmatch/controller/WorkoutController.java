@@ -18,14 +18,12 @@ public class WorkoutController {
 
     private final WorkoutService workoutService;
 
-    // 1. שער פתוח: קבלת כל האימונים בעולם לספריית האימונים (כמו החדרים ב-THM)
     @GetMapping
     public ResponseEntity<List<WorkoutDTO>> getAllWorkouts() {
         List<WorkoutDTO> workouts = workoutService.getAllWorkouts();
         return ResponseEntity.ok(workouts);
     }
 
-    // 2. חיפוש וסינון מתקדם: סנן לפי רמת קושי ומיקום האימון
     @GetMapping("/search")
     public ResponseEntity<List<WorkoutDTO>> searchWorkouts(
             @RequestParam(required = false) DifficultyLevel difficulty,
@@ -34,7 +32,6 @@ public class WorkoutController {
         return ResponseEntity.ok(filteredWorkouts);
     }
 
-    // 3. הוספת אימון חדש (פיצ'ר Admin)
     @PostMapping("/add")
     public ResponseEntity<WorkoutDTO> addWorkout(@RequestBody com.fitway.fitmatch.dto.WorkoutCreateDTO dto) {
         WorkoutDTO created = workoutService.addWorkout(dto);

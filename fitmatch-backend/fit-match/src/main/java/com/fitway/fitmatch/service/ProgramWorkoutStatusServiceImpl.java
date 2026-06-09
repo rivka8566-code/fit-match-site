@@ -29,21 +29,23 @@ public class ProgramWorkoutStatusServiceImpl implements ProgramWorkoutStatusServ
     private final WorkoutRepository workoutRepository;
     private final UserRepository userRepository;
     private final NutritionTipRepository nutritionTipRepository;
+    private final UserService userService;
     private final ModelMapper mapper;
     private final EntityManager entityManager;
 
     @Override
     @Transactional
     public UserProgramDTO markWorkoutCompleted(Long programId, Long workoutId, Integer sequence) {
-        UserProgram program = userProgramRepository.findById(programId)
+        UserProgram program = userProgramRepository.findById(programId)// שומר את התוכנית המלאה עפ"י ה-ID שלה.
                 .orElseThrow(() -> new ProgramException("תוכנית לא נמצאה."));
 
-        Workout workout = workoutRepository.findById(workoutId)
+        Workout workout = workoutRepository.findById(workoutId)// שומר את האימון המלא עפ"י ה-ID שלו.
                 .orElseThrow(() -> new WorkoutException("האימון לא נמצא."));
 
-        List<ProgramWorkoutStatus> statuses = statusRepository.findByProgramId(programId);
+        List<ProgramWorkoutStatus> statuses = statusRepository.findByProgramId(programId);// שומר את כל הסטטוסים של
+                                                                                          // האימונים בתוכנית זו.
         int daysPerWeek = program.getDaysPerWeekTarget();
-        List<Workout> programWorkouts = program.getWorkouts();
+        List<Workout> programWorkouts = program.getWorkouts();// האימונים של התוכנית בצורת רשימה, לפי הסדר שלהם בתוכנית.
 
         int workoutIndex = -1;
         if (sequence != null) {
@@ -74,18 +76,24 @@ public class ProgramWorkoutStatusServiceImpl implements ProgramWorkoutStatusServ
 
         int currentWeek = workoutIndex / daysPerWeek;
         long completedThisWeek = 0;
-        for (int i = currentWeek * daysPerWeek; i < Math.min((currentWeek + 1) * daysPerWeek, programWorkouts.size()); i++) {
+        for (int i = currentWeek * daysPerWeek; i < Math.min((currentWeek + 1) * daysPerWeek,
+                programWorkouts.size()); i++) {// בודק כמה אימונים כבר הושלמו בשבוע הנוכחי של התוכנית.
             final int idx = i;
-            if (statuses.stream().anyMatch(s -> s.getSequence() == idx && s.isCompleted())) {
+            if (statuses.stream().anyMatch(s -> s.getSequence() == idx && s.isCompleted())) {// אם האימון הושלם, מגדיל
+                                                                                             // את הספירה של האימונים
+                                                                                             // שהושלמו השבוע.
                 completedThisWeek++;
             }
         }
 
-        if (completedThisWeek >= daysPerWeek) {
+        if (completedThisWeek >= daysPerWeek) {// אם כבר הושלמו מספיק אימונים לשבוע זה, זורק חריגה שמודיעה למשתמש שהוא
+                                               // לא יכול להשלים עוד אימון השבוע.
             throw new WorkoutException("כבר השלמת את מכסת האימונים לשבוע זה. חכה לשבוע הבא!");
         }
 
-        ProgramWorkoutStatus status = statusRepository
+        ProgramWorkoutStatus status = statusRepository// מוצא את הסטטוס של האימון בתוכנית לפי ה-ID של התוכנית ומספר
+                                                      // האימון בסדר השבועי. אם לא קיים, יוצר סטטוס חדש עם סטטוס לא
+                                                      // הושלם.
                 .findByProgramIdAndSequence(programId, workoutIndex)
                 .orElse(new ProgramWorkoutStatus(null, programId, workoutId, workoutIndex, false));
 
@@ -96,9 +104,7 @@ public class ProgramWorkoutStatusServiceImpl implements ProgramWorkoutStatusServ
             program.setBurnedCaloriesInProgram(
                     program.getBurnedCaloriesInProgram() + workout.getCaloriesBurned());
 
-            program.getUser().setTotalCaloriesBurned(
-                    program.getUser().getTotalCaloriesBurned() + workout.getCaloriesBurned());
-            userRepository.save(program.getUser());
+            userService.addCaloriesToUser(program.getUser().getId(), workout.getCaloriesBurned());
 
             long totalCompleted = statusRepository.findByProgramId(programId).stream()
                     .filter(ProgramWorkoutStatus::isCompleted).count();
@@ -106,15 +112,7 @@ public class ProgramWorkoutStatusServiceImpl implements ProgramWorkoutStatusServ
             if (totalCompleted >= programWorkouts.size()) {
                 program.setStatus(com.fitway.fitmatch.entity.enums.ProgramStatus.COMPLETED);
                 userProgramRepository.saveAndFlush(program);
-
-                userProgramRepository
-                        .findByUserIdAndStatus(program.getUser().getId(),
-                                com.fitway.fitmatch.entity.enums.ProgramStatus.FUTURE)
-                        .ifPresent(next -> {
-                            next.setStatus(com.fitway.fitmatch.entity.enums.ProgramStatus.ACTIVE);
-                            next.setStartDate(java.time.LocalDate.now());
-                            userProgramRepository.save(next);
-                        });
+                System.out.println("🎉 המשתמש סיים את כל האימונים בתוכנית! הסטטוס שונה ל-COMPLETED.");
             } else {
                 userProgramRepository.saveAndFlush(program);
             }

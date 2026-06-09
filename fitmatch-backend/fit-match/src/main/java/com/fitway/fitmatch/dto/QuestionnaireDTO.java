@@ -12,7 +12,6 @@ public class QuestionnaireDTO {
     private List<WorkoutLocation> preferredLocations;
     private int daysPerWeek;
     private int durationWeeks;
-    private int weeklyCaloriesGoal;
     private List<Long> preferredBodyPartIds;
     private List<Long> availableEquipmentIds;
 }

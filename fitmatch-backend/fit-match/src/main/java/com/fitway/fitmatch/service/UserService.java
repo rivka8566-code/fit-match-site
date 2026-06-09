@@ -9,7 +9,7 @@ import com.fitway.fitmatch.dto.UserResponseDTO;
 public interface UserService {
     UserResponseDTO register(UserRegisterRequestDTO request);
     UserResponseDTO login(LoginRequestDTO request);
-    UserResponseDTO getUserById(Long id); // שליפת פרופיל
-    List<UserResponseDTO> getAllUsers(); // פיצ'ר אדמין
-    UserResponseDTO addCaloriesToUser(Long id, int calories); // סגירת אימון
+    UserResponseDTO getUserById(Long id); 
+    List<UserResponseDTO> getAllUsers();
+    UserResponseDTO addCaloriesToUser(Long id, int calories); 
 }

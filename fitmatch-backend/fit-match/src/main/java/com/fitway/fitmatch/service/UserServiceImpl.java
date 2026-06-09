@@ -25,7 +25,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO register(UserRegisterRequestDTO request) {
-        // בדיקה האם האימייל כבר תפוס
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new UserAuthException("כתובת האימייל הזו כבר רשומה במערכת!");
         }

@@ -6,6 +6,6 @@ import com.fitway.fitmatch.dto.NutritionTipDTO;
 
 public interface NutritionTipService {
     void add(NutritionTipDTO tipDto);
-    List<NutritionTipDTO> getAllTips(); // חדש
-    void deleteById(Long id); // חדש
+    List<NutritionTipDTO> getAllTips(); 
+    void deleteById(Long id);
 }
