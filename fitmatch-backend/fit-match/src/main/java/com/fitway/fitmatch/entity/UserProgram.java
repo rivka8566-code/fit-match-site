@@ -33,10 +33,7 @@ public class UserProgram {
     private ProgramStatus status; // ACTIVE, COMPLETED, FUTURE
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "program_workouts",
-        joinColumns = @JoinColumn(name = "program_id"),
-        inverseJoinColumns = @JoinColumn(name = "workout_id")
-    )
-    private List<Workout> workouts;
+    @JoinTable(name = "user_program_workouts", joinColumns = @JoinColumn(name = "program_id"), inverseJoinColumns = @JoinColumn(name = "workout_id"))
+    @OrderColumn(name = "workout_order") // 👈 השורה הזו היא קסם טהור!
+    private List<Workout> workouts = new java.util.ArrayList<>();
 }

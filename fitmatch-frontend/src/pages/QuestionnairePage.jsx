@@ -47,7 +47,7 @@ export default function QuestionnairePage() {
     preferredLocations: [],
     daysPerWeek: 3,
     durationWeeks: 4,
-    weeklyCaloriesGoal: 1500,
+    weeklyCaloriesGoal: 0,
     preferredBodyPartIds: [],
     availableEquipmentIds: [],
   });
@@ -90,8 +90,13 @@ export default function QuestionnairePage() {
   const canNext = () => {
     if (step === 0) return !!form.difficultyLevel;
     if (step === 1) return form.preferredLocations.length > 0;
+      if (step === 2) {
+    // 👈 מעדכנים את זה שלא יבדוק יותר את weeklyCaloriesGoal
+    return form.daysPerWeek > 0 && form.durationWeeks > 0;
+  }
     return true;
   };
+  
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -106,6 +111,7 @@ export default function QuestionnairePage() {
         preferredBodyPartIds: form.preferredBodyPartIds,
         availableEquipmentIds: form.availableEquipmentIds,
       });
+      localStorage.setItem('has_program', 'true');
       navigate('/dashboard');
     } catch (err) {
       showToast(err.response?.data || 'שגיאה ביצירת התוכנית');
@@ -202,16 +208,6 @@ export default function QuestionnairePage() {
           {step === 3 && (
             <div className="options-form">
               <h3 className="step-title">יעדים וציוד</h3>
-
-              <div className="slider-group">
-                <div className="slider-row">
-                  <label>יעד קלוריות שבועי</label>
-                  <span className="slider-val">{form.weeklyCaloriesGoal.toLocaleString()}</span>
-                </div>
-                <input type="range" min="500" max="5000" step="100" value={form.weeklyCaloriesGoal}
-                  onChange={e => set('weeklyCaloriesGoal', +e.target.value)} />
-                <div className="slider-ticks"><span>500</span><span>5,000</span></div>
-              </div>
 
               <div className="multi-group">
                 <label>חלקי גוף למיקוד (אופציונלי)</label>

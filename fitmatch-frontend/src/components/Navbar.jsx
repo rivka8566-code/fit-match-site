@@ -21,8 +21,8 @@ export default function Navbar() {
 
       <div className="navbar-links">
         <Link to="/dashboard" className={isActive('/dashboard') ? 'nav-active' : ''}>דף הבית</Link>
-        <Link to="/explore" className={isActive('/explore') ? 'nav-active' : ''}>חיפוש אימונים</Link>
-        <Link to="/profile" className={isActive('/profile') ? 'nav-active' : ''}>הפרופיל</Link>
+        <Link to="/explore" className={isActive('/explore') ? 'nav-active' : ''}>אימונים</Link>
+        <Link to="/profile" className={isActive('/profile') ? 'nav-active' : ''}>פרופיל</Link>
         {user?.role === 'ADMIN' && (
           <Link to="/admin" className={isActive('/admin') ? 'nav-active' : ''}>מנהל</Link>
         )}

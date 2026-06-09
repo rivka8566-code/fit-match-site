@@ -42,15 +42,25 @@ export default function LoginPage() {
     try {
       if (tab === 'register') {
         const res = await registerUser({ email: form.email, password: form.password, fullName: form.fullName });
-        // שומר ב-localStorage קודם, ואז login מעדכן state, ואז navigate
+
+        // משתמש חדש שנרשם - בטוח אין לו תוכנית עדיין!
         localStorage.setItem('fitmatch_user', JSON.stringify(res.data));
+        localStorage.setItem('has_program', 'false'); // מנחים את הראוטינג לשלוח לשאלון
+
         login(res.data);
         navigate('/questionnaire', { replace: true });
       } else {
         const res = await loginUser({ email: form.email, password: form.password });
+
         localStorage.setItem('fitmatch_user', JSON.stringify(res.data));
+
+        // כאן הקסם: בזמן לוגין של משתמש קיים, אנחנו מסירים זמנית את has_program
+        // זה יגרום לקומפוננטת הניתוב ב-App.jsx לעשות קריאת API קצרה לשרת ולבדוק אם יש לו תוכנית!
+        localStorage.removeItem('has_program');
+
         login(res.data);
-        navigate('/dashboard', { replace: true });
+        // הניווט ל-HomeRedirect יטפל בבדיקה האמיתית מול ה-DB
+        navigate('/', { replace: true });
       }
     } catch (err) {
       showToast(err.response?.data || 'שגיאה. נסה שוב.');

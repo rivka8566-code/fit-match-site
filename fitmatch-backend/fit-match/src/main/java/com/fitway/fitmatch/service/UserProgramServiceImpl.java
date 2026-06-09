@@ -43,10 +43,9 @@ public class UserProgramServiceImpl implements UserProgramService {
         User user = userRepository.findById(questionnaire.getUserId())
                 .orElseThrow(() -> new ProgramException("משתמש לא נמצא."));
 
-        int totalWorkoutsNeeded = questionnaire.getDaysPerWeek() * questionnaire.getDurationWeeks();
         List<Workout> allWorkouts = workoutRepository.findAll();
 
-        // סינון לפי רמה, מיקומים מרובים, וציוד
+        // 1. סינון בסיסי לפי רמה, מיקום וציוד
         List<Workout> validWorkouts = allWorkouts.stream()
                 .filter(w -> w.getDifficultyLevel() == questionnaire.getDifficultyLevel())
                 .filter(w -> questionnaire.getPreferredLocations() == null ||
@@ -58,43 +57,52 @@ public class UserProgramServiceImpl implements UserProgramService {
                                 .allMatch(eq -> questionnaire.getAvailableEquipmentIds().contains(eq.getId())))
                 .toList();
 
-        // מיון לפי התאמת חלקי גוף וקרבה ליעד קלורי רצוי לאימון
-        int desiredPerWorkout = Math.max(1, questionnaire.getWeeklyCaloriesGoal() / Math.max(1, questionnaire.getDaysPerWeek()));
-        List<Workout> sortedWorkouts = validWorkouts.stream()
-                .sorted(Comparator
-                        .comparingLong((Workout w) -> {
-                            if (questionnaire.getPreferredBodyPartIds() == null) return 0L;
-                            return w.getTargetBodyParts().stream()
-                                    .filter(bp -> questionnaire.getPreferredBodyPartIds().contains(bp.getId()))
-                                    .count();
-                        }).reversed()
-                        .thenComparingInt(w -> Math.abs(w.getCaloriesBurned() - desiredPerWorkout)))
-                .collect(Collectors.toList());
-
-        // בדיקה: אם אין אף אימון מתאים - לא נוכל לבנות תוכנית. אחרת
-        // ניתן להשתמש בחזרה מעגלית על מנת למלא את מספר האימונים הנדרש
-        if (sortedWorkouts.isEmpty()) {
-            throw new ProgramException(
-                "אין לנו אימונים מתאימים עבור ההגדרות שבחרת. " +
-                "נסה להרחיב את הגדרות הרמה, המיקום או הציוד.");
+        if (validWorkouts.isEmpty()) {
+            throw new ProgramException("אין לנו אימונים מתאימים עבור ההגדרות שבחרת. נסה להרחיב את הגדרות הרמה, המיקום או הציוד.");
         }
 
-        // בחירת אימונים ייחודיים קודם, ועד חזרה רק אם אין מספיק מגוון
+        // 2. פיצול המאגר לאימונים מועדפים (לפי חלקי גוף) ואימונים רגילים לצורך גיוון חכם
+        List<Workout> preferredPool = new java.util.ArrayList<>();
+        List<Workout> generalPool = new java.util.ArrayList<>();
+
+        for (Workout w : validWorkouts) {
+            boolean matchesBodyPart = questionnaire.getPreferredBodyPartIds() != null &&
+                    w.getTargetBodyParts().stream().anyMatch(bp -> questionnaire.getPreferredBodyPartIds().contains(bp.getId()));
+            
+            if (matchesBodyPart) {
+                preferredPool.add(w);
+            } else {
+                generalPool.add(w);
+            }
+        }
+
+        // מערבבים את שני המאגרים בצורה רנדומלית לחלוטין!
+        java.util.Collections.shuffle(preferredPool);
+        java.util.Collections.shuffle(generalPool);
+
+        // מחברים אותם כך שהמועדפים יהיו בהתחלה אבל בסדר אקראי, והשאר יפתחו לגיוון בסוף
+        List<Workout> finalPool = new java.util.ArrayList<>();
+        finalPool.addAll(preferredPool);
+        finalPool.addAll(generalPool);
+
+        // 3. שיבוץ אימונים בשיטת "חפיסת קלפים" למניעת כפילויות מוחלטת
         List<Workout> selectedWorkouts = new java.util.ArrayList<>();
-        java.util.Set<Long> seenWorkoutIds = new java.util.LinkedHashSet<>();
-        for (Workout workout : sortedWorkouts) {
-            if (selectedWorkouts.size() >= totalWorkoutsNeeded) break;
-            if (seenWorkoutIds.add(workout.getId())) {
-                selectedWorkouts.add(workout);
+        int totalWorkoutsNeeded = questionnaire.getDaysPerWeek() * questionnaire.getDurationWeeks();
+        
+        // מייצרים את "ערימת הקלפים" הנוכחית שלנו ומערבבים אותה
+        List<Workout> cardDeck = new java.util.ArrayList<>(finalPool);
+        java.util.Collections.shuffle(cardDeck);
+        
+        for (int i = 0; i < totalWorkoutsNeeded; i++) {
+            // אם ניצלנו את כל האימונים שבערימה, נמלא אותה מחדש ונערבב שוב בסדר אחר!
+            if (cardDeck.isEmpty()) {
+                cardDeck.addAll(finalPool);
+                java.util.Collections.shuffle(cardDeck);
             }
-        }
-
-        if (selectedWorkouts.size() < totalWorkoutsNeeded) {
-            int idx = 0;
-            while (selectedWorkouts.size() < totalWorkoutsNeeded) {
-                selectedWorkouts.add(sortedWorkouts.get(idx));
-                idx = (idx + 1) % sortedWorkouts.size();
-            }
+            
+            // שולפים את האימון הראשון מהערימה המעורבבת ומסירים אותו כדי שלא יחזור מיד
+            Workout workoutToSchedule = cardDeck.remove(0);
+            selectedWorkouts.add(workoutToSchedule);
         }
 
         Optional<UserProgram> activeProgramOpt = userProgramRepository
@@ -108,9 +116,10 @@ public class UserProgramServiceImpl implements UserProgramService {
         program.setDaysPerWeekTarget(questionnaire.getDaysPerWeek());
         program.setStatus(finalStatus);
         program.setWorkouts(selectedWorkouts);
-        int desiredTargetCalories = questionnaire.getWeeklyCaloriesGoal() * questionnaire.getDurationWeeks();
+        
+        // השרת פשוט מחשב את סך הקלוריות האמיתי שיצא מהאימונים המגוונים האלו ושומר אותו
         int actualWorkoutCalories = selectedWorkouts.stream().mapToInt(Workout::getCaloriesBurned).sum();
-        program.setTotalTargetCalories(Math.max(desiredTargetCalories, actualWorkoutCalories));
+        program.setTotalTargetCalories(actualWorkoutCalories); 
         program.setBurnedCaloriesInProgram(0);
 
         UserProgram savedProgram = userProgramRepository.save(program);
@@ -166,7 +175,6 @@ public class UserProgramServiceImpl implements UserProgramService {
         return buildProgramDTO(program);
     }
 
-    // מתודה מרוכזת לבניית ה-DTO עם completed flags וטיפים תזונתיים
     private UserProgramDTO buildProgramDTO(UserProgram program) {
         List<ProgramWorkoutStatus> statuses = statusRepository.findByProgramId(program.getId());
 
@@ -191,8 +199,7 @@ public class UserProgramServiceImpl implements UserProgramService {
                             () -> {
                                 wDto.setFoodRecommendation("הקפד על שילוב חלבון ופחמימה לאחר האימון.");
                                 wDto.setWaterRecommendation("שתה לפחות 2 כוסות מים לאחר האימון.");
-                            }
-                    );
+                            });
                     return wDto;
                 }).toList();
 

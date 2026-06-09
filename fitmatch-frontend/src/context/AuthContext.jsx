@@ -9,12 +9,13 @@ export function AuthProvider({ children }) {
   });
 
   const login = (userData) => {
-    localStorage.setItem('fitmatch_user', JSON.stringify(userData));
     setUser(userData);
+    localStorage.setItem('fitmatch_user', JSON.stringify(userData));
   };
 
   const logout = () => {
     localStorage.removeItem('fitmatch_user');
+    localStorage.removeItem('has_program');
     setUser(null);
   };
 

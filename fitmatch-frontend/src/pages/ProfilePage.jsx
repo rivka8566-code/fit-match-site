@@ -112,7 +112,7 @@ export default function ProfilePage() {
               const canActivate = p.status === 'FUTURE';
 
               return (
-                <div key={p.id} className="timeline-item" onClick={() => navigate('/dashboard', { state: { programId: p.id } })} style={{cursor:'pointer'}}>
+                <div key={p.id} className="timeline-item" onClick={p.status === 'ACTIVE' ? () => navigate('/dashboard', { state: { programId: p.id } }) : undefined} style={{cursor: p.status === 'ACTIVE' ?'pointer' : 'default'}}>
                   <div className={`timeline-dot-colored ${s.cls}`} />
                   <div className="timeline-content">
                     <div className="timeline-header">
