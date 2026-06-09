@@ -10,7 +10,6 @@ import com.fitway.fitmatch.exception.WorkoutException;
 import com.fitway.fitmatch.repository.NutritionTipRepository;
 import com.fitway.fitmatch.repository.ProgramWorkoutStatusRepository;
 import com.fitway.fitmatch.repository.UserProgramRepository;
-import com.fitway.fitmatch.repository.UserRepository;
 import com.fitway.fitmatch.repository.WorkoutRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
