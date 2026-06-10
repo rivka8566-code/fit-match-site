@@ -97,7 +97,7 @@ public class EmailReminderScheduler {
                 continue;
             }
 
-            int daysPerWeek = program.getDaysPerWeekTarget(); // 👈 מתוקן לפי ה-Entity שלך
+            int daysPerWeek = program.getDaysPerWeekTarget();
             List<ProgramWorkoutStatus> statuses = statusRepository.findByProgramId(program.getId());
             List<Long> completedIds = statuses.stream()
                     .filter(ProgramWorkoutStatus::isCompleted)
@@ -118,7 +118,6 @@ public class EmailReminderScheduler {
                 }
             }
 
-            // אם המשתמש לא השלים את כל אימוני השבוע - נשלח תזכורת מעוצבת
             if (completedThisWeek < daysPerWeek) {
                 int missing = daysPerWeek - (int) completedThisWeek;
 
@@ -158,14 +157,13 @@ public class EmailReminderScheduler {
 
     private void sendMail(String to, String subject, String bodyHtml) {
         try {
-            // שימוש ב-MimeMessage לתמיכה מלאה בעיצובי HTML וקריאות עברית תקינה
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
             helper.setFrom("info@fitmatch.com");
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(bodyHtml, true); // הפרמטר true קובע שהתוכן ייקרא כ-HTML מעוצב
+            helper.setText(bodyHtml, true);
 
             mailSender.send(mimeMessage);
             System.out.println("🎯 מייל מעוצב נשלח בהצלחה אל: " + to);
