@@ -11,6 +11,7 @@ import WorkoutDetailPage from './pages/WorkoutDetailPage';
 
 // ייבוא פונקציית ה-API המקורית מתוך קובץ ה-api.js שלך
 import { getActiveProgram } from './services/api';
+import ChatWidget from './components/ChatWidget';
 
 // 1. קומפוננטת הגנה על נתיבים למשתמשים מחוברים
 function ProtectedRoute({ children }) {
@@ -85,19 +86,23 @@ function HomeRedirect() {
 function AppRoutes() {
   const { user } = useAuth();
   return (
-    <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
-      <Route path="/questionnaire" element={<ProtectedRoute><QuestionnairePage /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-      <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-      <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
-      <Route path="/workout/:workoutId" element={<ProtectedRoute><WorkoutDetailPage /></ProtectedRoute>} />
+    <>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
+        <Route path="/questionnaire" element={<ProtectedRoute><QuestionnairePage /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
+        <Route path="/workout/:workoutId" element={<ProtectedRoute><WorkoutDetailPage /></ProtectedRoute>} />
 
-      {/* נתיב ברירת המחדל מריץ את הבדיקה החכמה */}
-      <Route path="/" element={<HomeRedirect />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="/" element={<HomeRedirect />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      
+      {/* הוספת הבלון הצף - הוא יופיע אוטומטית רק למשתמש מחובר */}
+      <ChatWidget />
+    </>
   );
 }
 

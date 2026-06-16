@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('fitmatch_user');
     localStorage.removeItem('has_program');
     setUser(null);
+    window.location.href = '/login';
   };
 
   return (

@@ -1,0 +1,29 @@
+# --- סביבה וירטואלית (Virtual Environments) ---
+# התיקייה שמכילה את כל הספריות הפיזיות שרוחשות ברקע (כמו OpenAI, Flask וכו')
+venv/
+ENV/
+env/
+
+# --- קבצי הגדרות רגישים ומפתחות API ---
+# חוק ברזל: לעולם לא מעלים מפתחות API סודיים ל-GitHub!
+.env
+
+# --- קבצי זיכרון ו-RAG דינמיים של הבוט ---
+storage/
+data/
+
+# --- קבצי מערכת של פייתון (Python Cache) ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# --- הגדרות סביבת עבודה ועורכי קוד ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
