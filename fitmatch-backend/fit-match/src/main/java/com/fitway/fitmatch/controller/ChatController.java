@@ -6,13 +6,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bot")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // התאמה מלאה לשאר הקונטרולרים באתר
+@CrossOrigin(origins = "*")
 public class ChatController {
 
     private final WorkoutService workoutService;
@@ -22,25 +22,33 @@ public class ChatController {
     private final String PYTHON_BOT_URL = "http://localhost:5000/api/chat";
 
     @PostMapping("/message")
-public ResponseEntity<Object> sendMessageToBot(@RequestBody Map<String, Object> payload) {
-    try {
-        System.out.println("=== בדיקת שליפת נתונים עבור הבוט ===");
-        
-        var allWorkouts = workoutService.getAllWorkouts();
-        System.out.println("אימונים שנשלפו מה-Service: " + (allWorkouts != null ? allWorkouts.toString() : "NULL"));
-
-        var allTips = nutritionTipService.getAllTips();
-        System.out.println("טיפים שנשלפו מה-Service: " + (allTips != null ? allTips.toString() : "NULL"));
-        
-        Map<String, Object> enrichedPayload = new HashMap<>(payload);
-        enrichedPayload.put("workoutsDB", allWorkouts);
-        enrichedPayload.put("tipsDB", allTips);
-
-        // העברת המידע המסונכרן לשרת הפייתון
-        Object response = restTemplate.postForObject(PYTHON_BOT_URL, enrichedPayload, Object.class);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Object> sendMessageToBot(@RequestBody Map<String, Object> payload) {
+        try {
+            // העברת ההודעה וההיסטוריה ישירות לפייתון ללא שליפה מיותרת מה-DB
+            Object response = restTemplate.postForObject(PYTHON_BOT_URL, payload, Object.class);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "שגיאה בסנכרון הנתונים מול ה-DB: " + e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of("error", "שגיאה בתקשורת מול שרת הבוט: " + e.getMessage()));
+        }
+    }
+
+    // נקודת קצה לשליפת אימונים לפי דרישה עבור שירות הפייתון
+    @GetMapping("/workouts")
+    public ResponseEntity<List<?>> getAllWorkoutsForBot() {
+        try {
+            return ResponseEntity.ok(workoutService.getAllWorkouts());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    // נקודת קצה לשליפת טיפי תזונה לפי דרישה עבור שירות הפייתון
+    @GetMapping("/nutrition-tips")
+    public ResponseEntity<List<?>> getAllTipsForBot() {
+        try {
+            return ResponseEntity.ok(nutritionTipService.getAllTips());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 }

@@ -10,16 +10,13 @@ export default function ChatWidget() {
   
   const messagesEndRef = useRef(null);
 
-  // האפקט שאחראי לרנדר את הצ'אט מחדש ולנקות אותו בכל פעם שהוא נפתח/נסגר
   useEffect(() => {
     if (!isOpen) {
-      // ברגע שהמשתמש סוגר את הצ'אט, אנחנו מנקים את ההיסטוריה וההודעה שבקלט
       setHistory([]);
       setMessage('');
     }
   }, [isOpen]);
 
-  // גלילה אוטומטית לסוף השיחה
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });

@@ -4,13 +4,11 @@ from flask import Flask, request, jsonify
 from openai import OpenAI
 
 from bot.config import OPENAI_API_KEY, SYSTEM_PROMPT
-from bot.rag_manager import update_rag_files_from_db, load_rag_context
-from bot.skills import calculate_body_metrics, search_workouts
+from bot.skills import calculate_body_metrics, search_workouts, get_nutrition_tips
 
 app = Flask(__name__)
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-# OpenAI tools configuration translated entirely to English for maximum accuracy
 tools = [
     {
         "type": "function",
@@ -20,10 +18,10 @@ tools = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "weight": {"type": "number", "description": "Weight in kilograms (e.g., 72.5)"},
-                    "height_cm": {"type": "number", "description": "Height in centimeters (e.g., 175)"},
-                    "age": {"type": "integer", "description": "Age in years (e.g., 24)"},
-                    "gender": {"type": "string", "description": "Gender of the user, strictly 'male' or 'female'"}
+                    "weight": {"type": "number", "description": "Weight in kilograms"},
+                    "height_cm": {"type": "number", "description": "Height in centimeters"},
+                    "age": {"type": "integer", "description": "Age in years"},
+                    "gender": {"type": "string", "description": "Gender, 'male' or 'female'"}
                 },
                 "required": ["weight", "height_cm", "age", "gender"]
             }
@@ -33,25 +31,26 @@ tools = [
         "type": "function",
         "function": {
             "name": "search_workouts",
-            "description": "Searches and filters fitness workouts from the database by strict attributes like difficulty level, exact duration in minutes, or location.",
+            "description": "Searches and filters fitness workouts from the database by attributes like difficulty level, exact duration in minutes, or location.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "difficulty_level": {
-                        "type": "string", 
-                        "enum": ["BEGINNER", "INTERMEDIATE", "ADVANCED"],
-                        "description": "The exact difficulty tier required."
-                    },
-                    "duration_minutes": {
-                        "type": "integer", 
-                        "description": "The exact workout duration in minutes (e.g., 15, 20, 30, 45, 50)."
-                    },
-                    "location": {
-                        "type": "string", 
-                        "enum": ["HOME", "GYM", "OUTDOOR"],
-                        "description": "Where the workout takes place."
-                    }
+                    "difficulty_level": {"type": "string", "enum": ["BEGINNER", "INTERMEDIATE", "ADVANCED"]},
+                    "duration_minutes": {"type": "integer", "description": "Workout duration in minutes"},
+                    "location": {"type": "string", "enum": ["HOME", "GYM", "OUTDOOR"]}
                 },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_nutrition_tips",
+            "description": "Retrieves the complete list of nutrition guidelines, calorie thresholds, food and water recommendations from the official database.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
                 "required": []
             }
         }
@@ -61,34 +60,22 @@ tools = [
 @app.route('/api/chat', methods=['POST'])
 def chat_endpoint():
     try:
-        data = request.get_json()
+        data = request.get_json() or {}
         user_message = data.get("message", "")
         client_history = data.get("history", [])
         
-        if "workoutsDB" in data and "tipsDB" in data:
-            update_rag_files_from_db(data["workoutsDB"], data["tipsDB"])
-            
-        rag_context = load_rag_context()
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
         
-        full_user_content = (
-            f"=== Updated Context from Database (RAG) ===\n"
-            f"{rag_context}\n"
-            f"============================================\n\n"
-            f"User Message: {user_message}"
-        )
-        
-        messages = [
-            {"role": "system", "content": SYSTEM_PROMPT}
-        ]
-        
+        # בניית היסטוריית שיחה נקייה ותקנית
         for msg in client_history:
             messages.append({
                 "role": msg.get("role", "user"),
                 "content": msg.get("content", "")
             })
             
-        messages.append({"role": "user", "content": full_user_content})
+        messages.append({"role": "user", "content": user_message})
         
+        # קריאה ראשונה ל-LLM לבדיקה האם נדרש כלי (Tool)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
@@ -117,6 +104,8 @@ def chat_endpoint():
                     duration_minutes=args.get("duration_minutes"),
                     location=args.get("location")
                 )
+            elif function_name == "get_nutrition_tips":
+                result = get_nutrition_tips()
             
             if result is not None:
                 messages.append(response_message)
@@ -127,9 +116,11 @@ def chat_endpoint():
                     "content": json.dumps(result, ensure_ascii=False)
                 })
                 
+                # קריאה שנייה לקבלת התשובה המנוסחת היטב על בסיס נתוני האמת
                 second_response = client.chat.completions.create(
                     model="gpt-4o-mini",
-                    messages=messages
+                    messages=messages,
+                    temperature=0.3
                 )
                 return jsonify({"response": second_response.choices[0].message.content})
         

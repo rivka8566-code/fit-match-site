@@ -1,25 +1,16 @@
 import os
-import json
-from bot.config import DATA_DIR
+import requests
+from bot.config import JAVA_BACKEND_URL
 
 def calculate_body_metrics(weight: float, height_cm: float, age: int, gender: str) -> dict:
     """
-    Calculates basic body metrics including Body Mass Index (BMI) and Basal Metabolic Rate (BMR)
-    based on the user's weight, height, age, and gender.
-    
-    Args:
-        weight: The user's weight in kilograms (kg).
-        height_cm: The user's height in centimeters (cm).
-        age: The user's age in years.
-        gender: The user's gender ('male' or 'female').
+    Calculates basic body metrics including Body Mass Index (BMI) and Basal Metabolic Rate (BMR).
     """
     height_m = height_cm / 100.0
     bmi = weight / (height_m ** 2)
     
     if gender.lower() in ['male', 'm', 'גבר', 'זכר']:
         bmr = (10 * weight) + (6.25 * height_cm) - (5 * age) + 5
-    elif gender.lower() in ['female', 'f', 'אישה', 'נקבה']:
-        bmr = (10 * weight) + (6.25 * height_cm) - (5 * age) - 161
     else:
         bmr = (10 * weight) + (6.25 * height_cm) - (5 * age) - 161
         
@@ -36,35 +27,28 @@ def calculate_body_metrics(weight: float, height_cm: float, age: int, gender: st
         "recommended_daily_calories": int(tdee)
     }
 
-
-
 def search_workouts(difficulty_level: str = None, duration_minutes: int = None, location: str = None) -> list:
     """
-    Searches and filters official workouts from the database based on strict parameters.
-    
-    Args:
-        difficulty_level: The required difficulty level ('BEGINNER', 'INTERMEDIATE', 'ADVANCED').
-        duration_minutes: The exact duration required in minutes (e.g., 15, 20, 30, 45).
-        location: The training location ('HOME', 'GYM', 'OUTDOOR').
+    Fetches and filters fitness workouts dynamically from the Java Spring Boot Backend.
     """
-    print(f"🔍 Executing strict workout filter: difficulty={difficulty_level}, duration={duration_minutes}, location={location}")
-    
-    json_path = os.path.join(DATA_DIR, "workouts_raw.json")
-    if not os.path.exists(json_path):
+    print(f"🔍 [Skill] Filtering workouts directly from DB via Java API... params: diff={difficulty_level}, dur={duration_minutes}, loc={location}")
+    try:
+        response = requests.get(f"{JAVA_BACKEND_URL}/workouts", timeout=5)
+        if response.status_code != 200:
+            return []
+        workouts = response.json()
+    except Exception as e:
+        print(f"❌ Error communicating with Java Backend: {str(e)}")
         return []
         
-    with open(json_path, "r", encoding="utf-8") as f:
-        workouts = json.load(f)
-        
     filtered_results = []
-    
     for w in workouts:
         if difficulty_level and w.get('difficultyLevel', '').upper() != difficulty_level.upper():
             continue
             
         if duration_minutes:
             w_duration = w.get('durationMinutes') or w.get('duration', 0)
-            if w_duration != duration_minutes:
+            if int(w_duration) != int(duration_minutes):
                 continue
                 
         if location and w.get('location', '').upper() != location.upper():
@@ -76,9 +60,21 @@ def search_workouts(difficulty_level: str = None, duration_minutes: int = None, 
             "difficultyLevel": w.get('difficultyLevel'),
             "durationMinutes": w.get('durationMinutes') or w.get('duration'),
             "caloriesBurned": w.get('caloriesBurned'),
-            "location": w.get('location'),
-            "foodRecommendation": w.get('foodRecommendation'),
-            "waterRecommendation": w.get('waterRecommendation')
+            "location": w.get('location')
         })
         
     return filtered_results
+
+def get_nutrition_tips() -> list:
+    """
+    Fetches official nutrition tips, thresholds, and water recommendations from the Java database.
+    """
+    print("🔍 [Skill] Fetching nutrition guidelines directly from DB via Java API...")
+    try:
+        response = requests.get(f"{JAVA_BACKEND_URL}/nutrition-tips", timeout=5)
+        if response.status_code == 200:
+            return response.json()
+        return []
+    except Exception as e:
+        print(f"❌ Error fetching nutrition tips: {str(e)}")
+        return []
